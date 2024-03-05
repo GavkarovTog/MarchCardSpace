@@ -7,11 +7,11 @@ class ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = (Colors.white);
-
     for (Particle particle in particles) {
-      canvas.drawCircle(Offset(particle.x * size.width, particle.y * size.height), size.width * 0.001, paint);
+      Paint paint = Paint()
+        ..color = (particle.color.withOpacity(particle.opacity));
+
+      canvas.drawCircle(Offset(particle.x * size.width, particle.y * size.height), size.width * 0.001 * particle.size, paint);
     }
   }
 

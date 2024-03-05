@@ -11,13 +11,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  final ParticleManager particleManager = ParticleManager(70);
+  late final ParticleManager particleManager;
   late final AnimationController controller;
 
   @override
   void initState() {
     AnimationControllerFactory factory = AnimationControllerFactory(this);
-    controller = factory.createController(const Duration(seconds: 1), toRepeat: true);
+    controller = factory.createController(const Duration(seconds: 1), loopBack: true);
+
+    particleManager = ParticleManager(
+      controller: controller,
+      colors: [Colors.white, Colors.greenAccent.shade100, Colors.lightBlueAccent.shade100, Colors.red.shade100],
+      opacityRange: PInterval(begin: 0.1, end: 1.0),
+      sizeRange: PInterval(begin: 1, end: 5),
+      velocityRange: PInterval(begin: 0.005, end: 0.01),
+      fading: true
+    );
 
     super.initState();
   }
@@ -32,13 +41,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           builder: (_, __) {
             particleManager.update();
 
-            return Container(
-              alignment: Alignment.center,
-              color: Colors.black,
-              child: CustomPaint(
-                size: Size.infinite,
-                foregroundPainter: ParticlePainter(particleManager.particles),
-              ),
+            return LayoutBuilder(
+              builder: (_, constraints) {
+                if (! particleManager.inited) {
+                  const baseDeviceArea = 289618.5123966942;
+                  // pixel 3 -> 500
+                  // another - x
+
+                  final countOfParticles = 500 * constraints.maxWidth * constraints.maxHeight
+                      ~/ baseDeviceArea;
+
+                  particleManager.initParticles(countOfParticles);
+                }
+
+                return Container(
+                  alignment: Alignment.center,
+                  color: Colors.black,
+                  child: CustomPaint(
+                    size: Size.infinite,
+                    foregroundPainter: ParticlePainter(
+                        particleManager.particles),
+                  ),);
+              },
             );
           }
         ),
