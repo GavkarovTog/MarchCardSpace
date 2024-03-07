@@ -14,20 +14,31 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController controller;
   final AudioPlayer player = AudioPlayer();
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      player.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      player.resume();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+
+  @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     AnimationControllerFactory factory = AnimationControllerFactory(this);
     controller = factory.createController(const Duration(seconds: 1), loopBack: true);
-    // player.setAsset("assets/sounds/ambient.mp3").then(
-    //     (_) {
-    //       player.setLoopMode(LoopMode.all);
-    //       player.play();
-    //     }
-    // );
 
     player.play(AssetSource("sounds/ambient.mp3"));
     player.onPlayerComplete.listen((event) {
