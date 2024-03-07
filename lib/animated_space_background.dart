@@ -34,6 +34,8 @@ class AnimatedSpaceBackground extends AnimatedWidget {
               ~/ baseDeviceArea;
 
           particleManager.initParticles(countOfParticles);
+        } else {
+          particleManager.update();
         }
 
         return Container(

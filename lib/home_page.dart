@@ -1,7 +1,11 @@
+import 'dart:math';
+
+import 'package:another_march_card/animated_asteroids_background.dart';
+import 'package:another_march_card/animated_space_background.dart';
 import 'package:another_march_card/animation_utils.dart';
-import 'package:another_march_card/particle_painter.dart';
-import 'package:another_march_card/particles_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -11,60 +15,78 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late final ParticleManager particleManager;
   late final AnimationController controller;
+  final AudioPlayer player = AudioPlayer();
 
   @override
   void initState() {
     AnimationControllerFactory factory = AnimationControllerFactory(this);
     controller = factory.createController(const Duration(seconds: 1), loopBack: true);
+    // player.setAsset("assets/sounds/ambient.mp3").then(
+    //     (_) {
+    //       player.setLoopMode(LoopMode.all);
+    //       player.play();
+    //     }
+    // );
 
-    particleManager = ParticleManager(
-      controller: controller,
-      colors: [Colors.white, Colors.greenAccent.shade100, Colors.lightBlueAccent.shade100, Colors.red.shade100],
-      opacityRange: PInterval(begin: 0.1, end: 1.0),
-      sizeRange: PInterval(begin: 1, end: 5),
-      velocityRange: PInterval(begin: 0.005, end: 0.01),
-      fading: true
-    );
+    player.play(AssetSource("sounds/ambient.mp3"));
+    player.onPlayerComplete.listen((event) {
+      player.play(AssetSource("sounds/ambient.mp3"));
+    });
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
-      body: SafeArea(
-        top: false,
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (_, __) {
-            particleManager.update();
+      body: AnnotatedRegion(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent
+        ),
+        child: SafeArea(
+          top: false,
+          child: Stack(children: [
+            AnimatedSpaceBackground(controller: controller,),
+            const AnimatedAsteroidsBackground(),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("8 Марта",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: "Bicubik",
+                      color: Colors.yellow.shade700,
+                      fontSize: 24,
+                    )
+                  ),
+                  const SizedBox(height: 10,),
+                  Text(
+                  """
+С Женским днем 8 Марта!
+Пусть исполнятся мечты.
+Пусть улыбкой озарятся
+Лиц прекрасные черты.
 
-            return LayoutBuilder(
-              builder: (_, constraints) {
-                if (! particleManager.inited) {
-                  const baseDeviceArea = 289618.5123966942;
-                  // pixel 3 -> 500
-                  // another - x
+Теплоты, любви, успехов,
+Ощущения весны,
+Жизни яркой, полной смеха,
+Ласки, счастья, доброты.
+                """,
 
-                  final countOfParticles = 500 * constraints.maxWidth * constraints.maxHeight
-                      ~/ baseDeviceArea;
-
-                  particleManager.initParticles(countOfParticles);
-                }
-
-                return Container(
-                  alignment: Alignment.center,
-                  color: Colors.black,
-                  child: CustomPaint(
-                    size: Size.infinite,
-                    foregroundPainter: ParticlePainter(
-                        particleManager.particles),
-                  ),);
-              },
-            );
-          }
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "Bicubik",
+                  color: Colors.yellow.shade700,
+                  fontSize: 18,
+                ),),
+              ]
+              ),
+            )
+          ])
         ),
       )
     );

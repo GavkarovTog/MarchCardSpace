@@ -2,13 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-enum FlowerType {
-  redCartoon,
-  blueStrange,
-  pinkMorning,
-  yellowSun,
-  greenFrog,
-  redSunrise
+enum AsteroidType {
+  gold_planet,
+  gray_moon,
+  blue_fish,
+  desert_rock
 }
 
 class AnimationControllerFactory {
@@ -60,49 +58,46 @@ class AnimationControllerFactory {
   }
 }
 
-class _Flower extends AnimatedWidget {
+class _Asteroid extends AnimatedWidget {
   final double size;
-  final FlowerType type;
+  final AsteroidType type;
   final double beginScale;
   final double endScale;
   final AnimationController turns;
   final AnimationController scale;
+  final double alignWidth;
+  final double alignHeight;
 
-  _Flower({
+  _Asteroid({
     super.key,
       required this.size,
       required this.type,
       required this.beginScale,
       required this.endScale,
       required this.turns,
-      required this.scale}) : super(listenable: Listenable.merge([turns, scale]));
+      required this.scale,
+      this.alignWidth = 0,
+      this.alignHeight = 0
+  }) : super(listenable: Listenable.merge([turns, scale]));
 
   @override
   Widget build(BuildContext context) {
-    int flowerNumber = 0;
+    int asteroidNumber = 0;
     switch (type) {
-      case FlowerType.redCartoon:
-        flowerNumber = 1;
+      case AsteroidType.gold_planet:
+        asteroidNumber = 1;
         break;
 
-      case FlowerType.blueStrange:
-        flowerNumber = 2;
+      case AsteroidType.gray_moon:
+        asteroidNumber = 2;
         break;
 
-      case FlowerType.pinkMorning:
-        flowerNumber = 3;
+      case AsteroidType.blue_fish:
+        asteroidNumber = 3;
         break;
 
-      case FlowerType.yellowSun:
-        flowerNumber = 4;
-        break;
-
-      case FlowerType.greenFrog:
-        flowerNumber = 5;
-        break;
-
-      case FlowerType.redSunrise:
-        flowerNumber = 6;
+      case AsteroidType.desert_rock:
+        asteroidNumber = 4;
         break;
     }
 
@@ -120,9 +115,10 @@ class _Flower extends AnimatedWidget {
       height: effectiveSize,
       // color: Colors.red, // TODO: if you need debug
       child: RotationTransition(
+        alignment: Alignment(alignWidth, alignHeight),
         turns: turns,
         child: Image.asset(
-          "assets/images/flower_${(flowerNumber < 10 ? '0' : '') + flowerNumber.toString()}.png",
+          "assets/images/asteroid_${(asteroidNumber < 10 ? '0' : '') + asteroidNumber.toString()}.png",
           width: size * scaleValue,
           height: size * scaleValue,
         ),
@@ -131,44 +127,50 @@ class _Flower extends AnimatedWidget {
   }
 }
 
-class FlowerFactory {
+class AsteroidFactory {
   final double size;
-  const FlowerFactory(this.size);
+  const AsteroidFactory(this.size);
 
-  Widget createFlower({
-    required FlowerType type,
+  Widget createAsteroid({
+    required AsteroidType type,
     required double beginScale,
     required double endScale,
     required AnimationController turns,
-    required AnimationController scale
+    required AnimationController scale,
+    double alignWidth = 0,
+    double alignHeight = 0
   }) {
-    return _Flower(
+    return _Asteroid(
       size: size,
       type: type,
       beginScale: beginScale,
       endScale: endScale,
       turns: turns,
       scale: scale,
+      alignWidth: alignWidth,
+      alignHeight: alignHeight,
     );
   }
 }
 
-class FlowerManager {
+class AsteroidManager {
   final double width;
   final double height;
   final double size;
-  final FlowerFactory factory;
+  final AsteroidFactory factory;
 
-  FlowerManager(this.width, this.height, this.size) : factory = FlowerFactory(size);
+  AsteroidManager(this.width, this.height, this.size) : factory = AsteroidFactory(size);
 
-  Widget createFlower({
+  Widget createAsteroid({
     required double widthAxis,
     required double heightAxis,
-    required FlowerType type,
+    required AsteroidType type,
     required double beginScale,
     required double endScale,
     required AnimationController turns,
-    required AnimationController scale
+    required AnimationController scale,
+    double alignWidth = 0,
+    double alignHeight = 0
   }) {
     if (widthAxis < 0 || widthAxis > 1 || heightAxis < 0 || heightAxis > 1) {
       throw UnsupportedError("Axis values must be in interval 0 <= x <= 1");
@@ -181,7 +183,15 @@ class FlowerManager {
     return Positioned(
         left: safeLeft,
         top: safeTop,
-        child: factory.createFlower(type: type, beginScale: beginScale, endScale: endScale, turns: turns, scale: scale)
+        child: factory.createAsteroid(
+            type: type,
+            beginScale: beginScale,
+            endScale: endScale,
+            turns: turns,
+            scale: scale,
+            alignWidth: alignWidth,
+            alignHeight: alignHeight
+        )
     );
   }
 }
